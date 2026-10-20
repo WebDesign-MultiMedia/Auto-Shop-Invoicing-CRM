@@ -125,7 +125,7 @@ export default function Home() {
           <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="text-lg font-bold text-slate-100">
-                Paid Receipt & Invoice Generator
+                Auto Shop Invoicing CRM
               </h1>
               <p className="text-sm text-slate-500">Internal tool — front desk use only</p>
             </div>

@@ -1,6 +1,48 @@
-https://invoice-tt.vercel.app/
+# Auto Shop Invoicing CRM
 
-https://invoice-o5jp4l45x-dev-vibes.vercel.app/
+Client-owned invoicing and CRM for an auto repair shop — VIN scanning, PDF receipts via email/SMS, customer history, and a daily revenue dashboard.
+
+**Live demo:** https://auto-shop-invoicing-crm.vercel.app
+
+## Features
+
+- **VIN scanning** - scan a VIN barcode with the device camera to fill in vehicle details and specs.
+- **Receipt generation** - create paid receipts with customer, vehicle, mileage, service, and payment info.
+- **PDF receipts by email/SMS** - receipts are emailed automatically, or shared by text as a secure link to a printable invoice page the customer can save as a PDF.
+- **Receipt history** - every receipt is logged to SheetDB and browsable from the History page.
+- **Returning-customer lookup** - search past receipts by customer name, car, or VIN.
+- **Daily totals dashboard** - revenue, average ticket, payment methods, and service mix charts.
+- **Demo data loader** - one click fills the form with sample data for testing and demos.
+
+## Tech Stack
+
+- React (Next.js)
+- Tailwind CSS
+- SheetDB
+- Vercel
+
+## Local Setup
+
+1. Install dependencies:
+   ```
+   npm install
+   ```
+2. Create a `.env.local` file in the project root with these variables:
+   - `SHEETDB_API_URL`
+   - `RESEND_API_KEY`
+   - `INVOICE_SHARE_SECRET`
+   - `NEXT_PUBLIC_APP_URL`
+3. Start the dev server:
+   ```
+   npm run dev
+   ```
+   Then open http://localhost:3000.
+
+## Why I Built It
+
+I built this for a real auto repair shop client as a client-owned alternative to
+subscription shop-management software. The shop keeps its own data and pays no
+monthly subscription fees.
 
 ## Public Invoice Links and Manual SMS Sharing
 
@@ -73,7 +115,7 @@ results.
   ```
   This must stay identical across deploys - changing it invalidates every link ever
   issued.
-- `NEXT_PUBLIC_APP_URL` - your production domain (e.g. `https://invoice-tt.vercel.app`),
+- `NEXT_PUBLIC_APP_URL` - your production domain (e.g. `https://auto-shop-invoicing-crm.vercel.app`),
   with no trailing slash. Set this in Vercel's **Production** environment variables so
   generated links always use your real domain instead of a preview deployment's URL.
   If unset, links fall back to whatever host served the request.

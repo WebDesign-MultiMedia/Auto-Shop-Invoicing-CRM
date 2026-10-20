@@ -1,8 +1,9 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Paid Receipt & Invoice Generator",
-  description: "Internal tool for generating and sending paid receipts to customers.",
+  title: "Auto Shop Invoicing CRM",
+  description:
+    "Client-owned invoicing and CRM for an auto repair shop — VIN scanning, PDF receipts via email/SMS, customer history, and a daily revenue dashboard.",
 };
 
 export default function RootLayout({ children }) {

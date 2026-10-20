@@ -1,5 +1,6 @@
 {
-  "name": "auto-shop-receipt-generator",
+  "name": "auto-shop-invoicing-crm",
+  "description": "Client-owned invoicing and CRM for an auto repair shop — VIN scanning, PDF receipts via email/SMS, customer history, and a daily revenue dashboard.",
   "version": "1.0.0",
   "private": true,
   "scripts": {
