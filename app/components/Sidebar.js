@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { logoutAction } from "../actions/auth";
 
 const NAV_ITEMS = [
   {
@@ -66,6 +67,20 @@ export default function Sidebar() {
           </Link>
         );
       })}
+
+      <form action={logoutAction} className="lg:mt-auto">
+        <button
+          type="submit"
+          title="Log out"
+          aria-label="Log out"
+          className="flex h-10 w-10 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-800 hover:text-slate-200"
+        >
+          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
+            <path d="M14 4h4a1 1 0 011 1v14a1 1 0 01-1 1h-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+            <path d="M10 8l-4 4 4 4M6 12h9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+      </form>
     </aside>
   );
 }

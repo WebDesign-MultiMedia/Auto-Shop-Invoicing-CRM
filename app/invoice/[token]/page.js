@@ -1,4 +1,4 @@
-import { getPublicInvoiceByToken } from "../../actions/shareInvoice";
+import { getPublicInvoiceByToken } from "../../lib/publicInvoice";
 import { getVehicleSpecFields } from "../../lib/vehicleSpecFields";
 import PrintButton from "./PrintButton";
 

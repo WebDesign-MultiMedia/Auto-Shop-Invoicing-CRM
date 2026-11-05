@@ -313,6 +313,11 @@ export default function Home() {
                     ✅ Receipt logged
                     {result.emailSent ? " and emailed to the customer." : "."}
                   </p>
+                  {result.demoNotice && (
+                    <p role="status" className="mt-1 text-xs font-medium text-amber-300">
+                      {result.demoNotice}
+                    </p>
+                  )}
                   {lastInvoice && (
                     <button
                       ref={textInvoiceTriggerRef}

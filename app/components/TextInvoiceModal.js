@@ -9,6 +9,7 @@ import {
 import { buildInvoiceSmsMessage } from "../lib/invoiceMessage";
 import { copyTextToClipboard, openManualSmsComposer } from "../lib/manualSms";
 import { getInvoiceShareUrl } from "../actions/shareInvoice";
+import { useDemoMode } from "./DemoMode";
 
 const FOCUSABLE_SELECTOR =
   'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
@@ -21,6 +22,7 @@ function formatInvoiceDate(dateValue) {
 }
 
 export default function TextInvoiceModal({ invoice, onClose, triggerRef }) {
+  const isDemo = useDemoMode();
   const dialogRef = useRef(null);
   const closeButtonRef = useRef(null);
   const phoneErrorId = useId();
@@ -132,6 +134,11 @@ export default function TextInvoiceModal({ invoice, onClose, triggerRef }) {
     setPhoneError("");
     const normalized = normalizeUSPhoneNumber(phoneInput);
 
+    if (isDemo) {
+      setStatusMessage("Demo mode: SMS not sent.");
+      return;
+    }
+
     const copied = await copyTextToClipboard(message);
     setStatusMessage(
       copied
@@ -144,6 +151,10 @@ export default function TextInvoiceModal({ invoice, onClose, triggerRef }) {
 
   async function handleShareInvoiceLink() {
     if (!linkReady || !canShare) return;
+    if (isDemo) {
+      setStatusMessage("Demo mode: SMS not sent.");
+      return;
+    }
     try {
       await navigator.share({
         title: invoice.id ? `Invoice ${invoice.id}` : "Invoice",

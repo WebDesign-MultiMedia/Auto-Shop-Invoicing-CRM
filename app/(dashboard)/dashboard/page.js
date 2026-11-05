@@ -5,6 +5,8 @@ import {
   aggregateByPaymentMethod,
   aggregateAvgTicketByWeek,
 } from "../../lib/dashboardData";
+import { requireStaff } from "../../lib/auth";
+import { isDemoMode } from "../../lib/demoMode";
 import RevenueLineChart from "../../components/charts/RevenueLineChart";
 import ServiceTypeChart from "../../components/charts/ServiceTypeChart";
 import PaymentMethodDonut from "../../components/charts/PaymentMethodDonut";
@@ -15,7 +17,8 @@ export const dynamic = "force-dynamic";
 const cardClass = "rounded-2xl border border-slate-800 bg-slate-800/40 p-5";
 
 export default async function DashboardPage() {
-  const invoices = await fetchInvoices();
+  const session = await requireStaff({ redirectToLogin: true });
+  const invoices = await fetchInvoices({ sid: session.sid });
 
   const revenueByWeek = aggregateRevenueByWeek(invoices);
   const byServiceType = aggregateByServiceType(invoices);
@@ -27,7 +30,7 @@ export default async function DashboardPage() {
       <div className="mb-6">
         <h1 className="text-lg font-bold text-slate-100">Operations Dashboard</h1>
         <p className="text-sm text-slate-500">
-          {invoices.length} invoice{invoices.length === 1 ? "" : "s"} logged to SheetDB
+          {invoices.length} invoice{invoices.length === 1 ? "" : "s"} {isDemoMode() ? "(sample data)" : "logged to SheetDB"}
         </p>
       </div>
 

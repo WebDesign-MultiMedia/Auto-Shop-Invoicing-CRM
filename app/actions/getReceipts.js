@@ -1,22 +1,19 @@
 "use server";
 
+import { requireStaff } from "../lib/auth";
+import { listReceipts } from "../lib/data";
+
 export async function getRecentReceipts({ limit = 4, search = "" } = {}) {
+  // Outside the try: an unauthenticated call must fail, not return a result.
+  const session = await requireStaff();
+
   try {
-    const res = await fetch(process.env.SHEETDB_API_URL, {
-      method: "GET",
-      cache: "no-store",
-    });
-
-    if (!res.ok) {
-      throw new Error(`SheetDB fetch failed (${res.status})`);
-    }
-
-    const rows = await res.json();
+    const rows = await listReceipts({ sid: session.sid });
 
     const filtered = search
       ? rows.filter((row) => {
           const haystack = `${row.clientName || ""} ${row.carDetails || ""} ${row.vin || ""}`.toLowerCase();
-          return haystack.includes(search.toLowerCase());
+          return haystack.includes(String(search).toLowerCase());
         })
       : rows;
 

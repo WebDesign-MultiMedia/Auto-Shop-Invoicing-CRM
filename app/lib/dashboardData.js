@@ -1,4 +1,5 @@
-import { getRecentReceipts } from "../actions/getReceipts";
+import "server-only";
+import { listReceipts } from "./data";
 
 const MAX_SERVICE_TYPES = 8;
 
@@ -16,12 +17,9 @@ function startOfWeekMonday(dateInput) {
   return d;
 }
 
-export async function fetchInvoices() {
-  const response = await getRecentReceipts({ limit: null });
-  if (!response.success) {
-    throw new Error(response.error || "Failed to fetch invoices");
-  }
-  return response.receipts;
+// Callers must authorize first (the dashboard page calls requireStaff()).
+export async function fetchInvoices({ sid } = {}) {
+  return listReceipts({ sid });
 }
 
 export function aggregateRevenueByWeek(invoices) {

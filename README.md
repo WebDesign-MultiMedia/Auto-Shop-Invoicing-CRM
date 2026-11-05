@@ -2,7 +2,7 @@
 
 Client-owned invoicing and CRM for an auto repair shop — VIN scanning, PDF receipts via email/SMS, customer history, and a daily revenue dashboard.
 
-**Live demo:** https://auto-shop-invoicing-crm.vercel.app
+**Live demo:** _demo URL coming soon_ (runs in demo mode with fake sample data - see below)
 
 ## Features
 
@@ -13,13 +13,18 @@ Client-owned invoicing and CRM for an auto repair shop — VIN scanning, PDF rec
 - **Returning-customer lookup** - search past receipts by customer name, car, or VIN.
 - **Daily totals dashboard** - revenue, average ticket, payment methods, and service mix charts.
 - **Demo data loader** - one click fills the form with sample data for testing and demos.
+- **Staff login** - every page and server action requires a signed session; only public invoice links are open.
+- **Demo mode** - a separate public deployment with realistic fake data that never touches the shop's sheet or email.
 
 ## Tech Stack
 
 - React (Next.js)
 - Tailwind CSS
 - SheetDB
+- Resend (email receipts)
+- D3 (dashboard charts)
 - Vercel
+- Vitest + GitHub Actions CI
 
 ## Local Setup
 
@@ -27,16 +32,64 @@ Client-owned invoicing and CRM for an auto repair shop — VIN scanning, PDF rec
    ```
    npm install
    ```
-2. Create a `.env.local` file in the project root with these variables:
-   - `SHEETDB_API_URL`
-   - `RESEND_API_KEY`
-   - `INVOICE_SHARE_SECRET`
-   - `NEXT_PUBLIC_APP_URL`
+2. Copy `.env.example` to `.env.local` and fill it in:
+   - `SESSION_SECRET` - `openssl rand -hex 32`
+   - `STAFF_ACCOUNTS` - `{"you@example.com":"<salt:hash>"}`, hash from `npm run hash-password`
+   - `INVOICE_SHARE_SECRET`, `NEXT_PUBLIC_APP_URL`
+   - `SHEETDB_API_URL`, `RESEND_API_KEY` (or set `DEMO_MODE=true` instead to use fake data)
 3. Start the dev server:
    ```
    npm run dev
    ```
-   Then open http://localhost:3000.
+   Then open http://localhost:3000 and log in.
+4. Run the tests: `npm test`. Lint: `npm run lint`.
+
+## Security
+
+- **Staff login.** Passwords are hashed with scrypt + a random salt (`salt:hash`) and
+  compared in constant time. Sessions are an HMAC-SHA256 signed, HttpOnly, Secure,
+  SameSite=Lax cookie that expires after 12 hours. If `SESSION_SECRET` or
+  `STAFF_ACCOUNTS` is missing or invalid, nobody can log in (fails closed).
+- **Two layers of protection.** `middleware.js` redirects every request without a valid
+  session to `/login`, and every server action and data page also calls
+  `requireStaff()` - server actions can be POSTed to any URL, so middleware alone isn't
+  enough. Public paths: `/login`, `/invoice/[token]`, `/privacy`, `/terms`, static files.
+- **Login rate limiting.** 5 attempts per 15 minutes per IP + login, held in memory. On
+  Vercel each serverless instance has its own memory and cold starts reset it, so this
+  slows guessing but is not a hard limit. For a hard limit, add Vercel Firewall rate
+  limiting on `POST /login` or a shared store such as Upstash Redis.
+- **Security headers.** `X-Frame-Options: DENY`, `frame-ancestors 'none'`, `nosniff`,
+  `strict-origin-when-cross-origin`, and a `Permissions-Policy` that only allows the
+  camera (for the VIN scanner).
+- **Receipt emails** escape all customer-entered text.
+
+### Adding or removing staff
+
+1. `npm run hash-password` (asks for the password without showing it).
+2. Add `"login":"salt:hash"` to the `STAFF_ACCOUNTS` JSON in Vercel. A login is an email
+   or a 10-digit phone number.
+3. Redeploy. Removing an entry and redeploying signs that person out immediately.
+
+## Deployment: production vs. demo
+
+Run **two separate Vercel projects** from this same repo.
+
+| Env var | Production (the shop - private) | Demo (public portfolio) |
+|---|---|---|
+| `DEMO_MODE` | _unset_ | `true` |
+| `SHEETDB_API_URL` | real value | **must be unset** (the app refuses to start if it's set) |
+| `RESEND_API_KEY` | real value | unset |
+| `SESSION_SECRET` | its own `openssl rand -hex 32` | a **different** `openssl rand -hex 32` |
+| `STAFF_ACCOUNTS` | real staff logins | `{"demo@example.com":"<hash of the demo password>"}` |
+| `INVOICE_SHARE_SECRET` | real value (keep stable) | a **different** random value |
+| `NEXT_PUBLIC_APP_URL` | the shop's URL | the demo URL |
+| `DEMO_LOGIN_HINT` | unset | optional, e.g. `Demo login: demo@example.com / <demo password>` (shown on the login page) |
+
+- **Production** URL is shared only with the shop. Never put it on a resume or portfolio.
+- **Demo** shows a "Demo - sample data" banner and serves only fake customers (555-01xx
+  phone numbers, `@example.com` emails, made-up VINs). New invoices are kept in memory
+  for that visitor's session only, and emails/texts are simulated
+  ("Demo mode: email not sent.").
 
 ## Why I Built It
 
@@ -115,7 +168,7 @@ results.
   ```
   This must stay identical across deploys - changing it invalidates every link ever
   issued.
-- `NEXT_PUBLIC_APP_URL` - your production domain (e.g. `https://auto-shop-invoicing-crm.vercel.app`),
+- `NEXT_PUBLIC_APP_URL` - your production domain (e.g. `https://your-app.vercel.app`),
   with no trailing slash. Set this in Vercel's **Production** environment variables so
   generated links always use your real domain instead of a preview deployment's URL.
   If unset, links fall back to whatever host served the request.
