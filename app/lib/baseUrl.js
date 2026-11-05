@@ -7,13 +7,13 @@ import { headers } from "next/headers";
 // preview deployment's URL. Falls back to the current request's Host
 // header when unset, so links still work correctly on preview/local
 // deployments during testing - never hardcoded to localhost.
-export function getPublicBaseUrl() {
+export async function getPublicBaseUrl() {
   const configured = process.env.NEXT_PUBLIC_APP_URL;
   if (configured) {
     return configured.replace(/\/+$/, "");
   }
 
-  const host = headers().get("host");
+  const host = (await headers()).get("host");
   if (host) {
     const protocol = host.startsWith("localhost") || host.startsWith("127.0.0.1") ? "http" : "https";
     return `${protocol}://${host}`;

@@ -11,7 +11,7 @@ export const metadata = {
 };
 
 export default async function LoginPage({ searchParams }) {
-  const next = safeNextPath(searchParams?.next) || "";
+  const next = safeNextPath((await searchParams)?.next) || "";
   if (await readSession()) redirect(next || "/dashboard");
 
   const isDemo = isDemoMode();

@@ -3,7 +3,8 @@ import { getVehicleSpecFields } from "../../lib/vehicleSpecFields";
 import PrintButton from "./PrintButton";
 
 export async function generateMetadata({ params }) {
-  const result = await getPublicInvoiceByToken(params.token);
+  const { token } = await params;
+  const result = await getPublicInvoiceByToken(token);
   const title = result.success ? `Invoice ${result.invoice.id}` : "Invoice";
 
   return {
@@ -25,7 +26,8 @@ function NotFoundCard({ message }) {
 }
 
 export default async function PublicInvoicePage({ params }) {
-  const result = await getPublicInvoiceByToken(params.token);
+  const { token } = await params;
+  const result = await getPublicInvoiceByToken(token);
 
   if (!result.success) {
     return (

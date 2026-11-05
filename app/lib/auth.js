@@ -96,7 +96,7 @@ export async function createSession(login) {
   if (!secret) throw new NotAuthorizedError();
   const expires = Date.now() + SESSION_TTL_MS;
   const token = await signSession({ l: login, e: expires, s: newSessionId() }, secret);
-  cookies().set(SESSION_COOKIE, token, {
+  (await cookies()).set(SESSION_COOKIE, token, {
     httpOnly: true,
     secure: true,
     sameSite: "lax",
@@ -110,7 +110,7 @@ export async function createSession(login) {
 export async function readSession() {
   // Read the cookie first, unconditionally: this marks the calling page as
   // dynamic, so a "not logged in" result is never baked into a static page.
-  const token = cookies().get(SESSION_COOKIE)?.value;
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
   const secret = getSessionSecret();
   const accounts = getStaffAccounts();
   if (!secret || !accounts) return null;
@@ -129,6 +129,6 @@ export async function requireStaff({ redirectToLogin = false } = {}) {
   throw new NotAuthorizedError();
 }
 
-export function logout() {
-  cookies().delete(SESSION_COOKIE);
+export async function logout() {
+  (await cookies()).delete(SESSION_COOKIE);
 }

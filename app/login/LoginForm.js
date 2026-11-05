@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { loginAction } from "../actions/auth";
 
 const inputClass =
@@ -21,7 +22,7 @@ function SubmitButton() {
 }
 
 export default function LoginForm({ next }) {
-  const [state, formAction] = useFormState(loginAction, { error: "" });
+  const [state, formAction] = useActionState(loginAction, { error: "" });
 
   return (
     <form action={formAction} className="space-y-4">

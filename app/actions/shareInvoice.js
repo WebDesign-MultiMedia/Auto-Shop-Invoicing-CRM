@@ -26,7 +26,7 @@ export async function getInvoiceShareUrl(invoiceId) {
     }
 
     const token = createShareToken(invoiceId);
-    const baseUrl = getPublicBaseUrl();
+    const baseUrl = await getPublicBaseUrl();
 
     return { success: true, url: `${baseUrl}/invoice/${token}` };
   } catch (error) {
