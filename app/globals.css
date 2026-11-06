@@ -28,3 +28,13 @@ body {
     font-size: 16px !important;
   }
 }
+
+/* Page background behind everything, including the overscroll/bounce area.
+   Light by default (customer invoice, privacy, terms); staff pages mark
+   their root with .dark-surface so scrolling past the edge stays navy. */
+body {
+  background-color: #f1f5f9; /* slate-100 */
+}
+body:has(.dark-surface) {
+  background-color: #0f172a; /* slate-900 */
+}

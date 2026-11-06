@@ -1,4 +1,5 @@
 import Sidebar from "../components/Sidebar";
+import PageScroller from "../components/PageScroller";
 import { DemoBanner, DemoModeProvider } from "../components/DemoMode";
 import { requireStaff } from "../lib/auth";
 import { isDemoMode } from "../lib/demoMode";
@@ -14,9 +15,9 @@ export default async function DashboardLayout({ children }) {
   return (
     <DemoModeProvider isDemo={isDemo}>
       {isDemo && <DemoBanner />}
-      <div className={`flex min-h-screen flex-col bg-slate-900 lg:h-screen lg:flex-row ${isDemo ? "pt-6 lg:pt-0" : ""}`}>
+      <div className={`dark-surface flex min-h-screen flex-col bg-slate-900 lg:h-screen lg:flex-row ${isDemo ? "pt-6 lg:pt-0" : ""}`}>
         <Sidebar />
-        <div className="flex-1 overflow-y-auto pb-20 lg:pb-0">{children}</div>
+        <PageScroller className="flex-1 overflow-y-auto pb-28 lg:pb-0">{children}</PageScroller>
       </div>
     </DemoModeProvider>
   );
