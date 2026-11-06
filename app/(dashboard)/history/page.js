@@ -118,6 +118,7 @@ export default function HistoryPage() {
   const [viewingInvoiceId, setViewingInvoiceId] = useState(null);
   const [viewMode, setViewMode] = useState("list");
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [expandedId, setExpandedId] = useState(null);
 
   const paymentOptions = useMemo(() => {
     const methods = [...new Set(receipts.map((r) => r.paymentMethod).filter(Boolean))].sort();
@@ -270,41 +271,98 @@ export default function HistoryPage() {
             const formattedDate = receipt.dateCreated
               ? new Date(receipt.dateCreated).toLocaleDateString()
               : "";
+            const isOpen = expandedId === receipt.id;
+            const panelId = `receipt-details-${receipt.id}`;
 
             return (
               <div
                 key={receipt.id}
-                className="flex items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-800/40 px-4 py-3"
+                className={`overflow-hidden rounded-lg border bg-slate-800/40 transition ${
+                  isOpen ? "border-blue-500/50" : "border-slate-800"
+                }`}
               >
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-slate-100">{receipt.clientName}</p>
-                  <p className="truncate text-xs text-slate-500">
-                    {receipt.carDetails}
-                    {formattedDate ? ` · ${formattedDate}` : ""}
-                  </p>
-                </div>
-                <div className="flex shrink-0 items-center gap-2">
-                  {receipt.totalAmount && (
-                    <span className="text-sm font-semibold text-green-400">${receipt.totalAmount}</span>
-                  )}
+                <div className="flex items-center justify-between gap-3 pr-2">
                   <button
                     type="button"
-                    title="View Invoice"
-                    onClick={() => handleViewInvoice(receipt.id)}
-                    disabled={viewingInvoiceId === receipt.id}
-                    className="rounded p-1.5 text-slate-400 transition hover:bg-slate-800 hover:text-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
+                    onClick={() => setExpandedId(isOpen ? null : receipt.id)}
+                    aria-expanded={isOpen}
+                    aria-controls={panelId}
+                    className="flex min-w-0 flex-1 items-center gap-3 px-4 py-3 text-left transition hover:bg-slate-800/60"
                   >
-                    🔗
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                      className={`h-4 w-4 shrink-0 text-slate-500 transition-transform ${isOpen ? "rotate-90" : ""}`}
+                    >
+                      <path d="M9 6l6 6-6 6" />
+                    </svg>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-slate-100">{receipt.clientName}</p>
+                      <p className="truncate text-xs text-slate-500">
+                        {receipt.carDetails}
+                        {formattedDate ? ` · ${formattedDate}` : ""}
+                      </p>
+                    </div>
+                    {receipt.totalAmount && (
+                      <span className="shrink-0 text-sm font-semibold text-green-400">${receipt.totalAmount}</span>
+                    )}
                   </button>
-                  <button
-                    type="button"
-                    title="Text Invoice"
-                    onClick={(e) => openTextInvoice(receipt, e)}
-                    className="rounded p-1.5 text-slate-400 transition hover:bg-slate-800 hover:text-slate-200"
-                  >
-                    💬
-                  </button>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <button
+                      type="button"
+                      title="View Invoice"
+                      onClick={() => handleViewInvoice(receipt.id)}
+                      disabled={viewingInvoiceId === receipt.id}
+                      className="rounded p-1.5 text-slate-400 transition hover:bg-slate-800 hover:text-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      🔗
+                    </button>
+                    <button
+                      type="button"
+                      title="Text Invoice"
+                      onClick={(e) => openTextInvoice(receipt, e)}
+                      className="rounded p-1.5 text-slate-400 transition hover:bg-slate-800 hover:text-slate-200"
+                    >
+                      💬
+                    </button>
+                  </div>
                 </div>
+
+                {isOpen && (
+                  <div id={panelId} className="border-t border-slate-800 px-4 py-3">
+                    <div className="mb-3 flex items-center justify-between gap-3">
+                      <p className="text-xs text-slate-500">Receipt #{receipt.id}</p>
+                      <span className="shrink-0 rounded-full bg-green-500/10 px-2 py-0.5 text-[10px] font-semibold text-green-400">
+                        {receipt.paymentStatus || "PAID"}
+                      </span>
+                    </div>
+                    <div className="mb-3 grid grid-cols-1 gap-x-6 gap-y-1.5 text-xs sm:grid-cols-2">
+                      <Field label="Customer Email" value={receipt.clientEmail} />
+                      <Field label="Customer Phone" value={receipt.clientPhone} />
+                      <Field label="Car Info" value={receipt.carDetails} />
+                      <Field label="Car VIN" value={receipt.vin} />
+                      <Field label="Car Mileage" value={receipt.mileage} />
+                      <Field label="Payment Method" value={receipt.paymentMethod} />
+                      <Field label="Total Amount" value={receipt.totalAmount ? `$${receipt.totalAmount}` : ""} />
+                      <Field
+                        label="Date"
+                        value={receipt.dateCreated ? new Date(receipt.dateCreated).toLocaleString() : ""}
+                      />
+                    </div>
+                    {receipt.jobDetails && (
+                      <div className="mb-3 text-xs">
+                        <p className="text-slate-500">Job / Service Details:</p>
+                        <p className="mt-0.5 whitespace-pre-line text-slate-200">{receipt.jobDetails}</p>
+                      </div>
+                    )}
+                    <VehicleSpecsCard vehicleDetails={parseVehicleDetails(receipt.vehicleSpecifications)} />
+                  </div>
+                )}
               </div>
             );
           })}
