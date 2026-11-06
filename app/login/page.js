@@ -19,7 +19,7 @@ export default async function LoginPage({ searchParams }) {
   const demoHint = isDemo ? process.env.DEMO_LOGIN_HINT || "" : "";
 
   return (
-    <main className={`flex min-h-screen items-center justify-center bg-slate-900 p-4 ${isDemoMode() ? "pt-10 lg:pt-4" : ""}`}>
+    <main className={`flex h-dvh items-center justify-center overflow-hidden overscroll-none bg-slate-900 p-4 ${isDemoMode() ? "pt-10 lg:pt-4" : ""}`}>
       {isDemo && <DemoBanner />}
       <div className="w-full max-w-sm">
         <div className="mb-6 flex flex-col items-center gap-3 text-center">
