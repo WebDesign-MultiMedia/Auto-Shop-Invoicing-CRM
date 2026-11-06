@@ -81,7 +81,7 @@ export default async function PublicInvoicePage({ params }) {
                 )}
                 <tr className="border-b border-slate-200">
                   <td className="py-2 text-slate-500">Service Performed</td>
-                  <td className="py-2 text-right font-semibold">{invoice.jobDetails || "—"}</td>
+                  <td className="whitespace-pre-line py-2 text-right font-semibold">{invoice.jobDetails || "—"}</td>
                 </tr>
                 <tr className="border-b border-slate-200">
                   <td className="py-2 text-slate-500">Payment Method</td>

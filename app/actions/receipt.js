@@ -132,7 +132,7 @@ function buildReceiptEmailHtml({
             }
             <tr>
               <td style="padding: 8px 0; border-bottom: 1px solid #e2e8f0; color: #64748b;">Service Performed</td>
-              <td style="padding: 8px 0; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: 600;">${escapeHtml(jobDetails)}</td>
+              <td style="padding: 8px 0; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: 600; white-space: pre-line;">${escapeHtml(jobDetails)}</td>
             </tr>
             <tr>
               <td style="padding: 8px 0; border-bottom: 1px solid #e2e8f0; color: #64748b;">Payment Method</td>

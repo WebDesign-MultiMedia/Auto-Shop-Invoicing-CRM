@@ -217,7 +217,7 @@ export default function HistoryPage() {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search by customer name, car, or VIN..."
+          placeholder="Search by receipt #, customer name, car, or VIN..."
           className="w-full rounded-lg border border-slate-700 bg-slate-900 py-2.5 pl-9 pr-3 text-sm text-slate-100 placeholder-slate-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
         />
       </div>
@@ -448,7 +448,7 @@ export default function HistoryPage() {
 
                 <div className="mb-3 text-xs">
                   <p className="text-slate-500">Job / Service Details:</p>
-                  <p className="mt-0.5 text-slate-200">{receipt.jobDetails}</p>
+                  <p className="mt-0.5 whitespace-pre-line text-slate-200">{receipt.jobDetails}</p>
                 </div>
 
                 <VehicleSpecsCard vehicleDetails={vehicleDetails} />

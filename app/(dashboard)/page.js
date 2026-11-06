@@ -7,6 +7,7 @@ import RecentReceiptsPanel from "../components/RecentReceiptsPanel";
 import VehicleSpecsCard from "../components/VehicleSpecsCard";
 import TextInvoiceModal from "../components/TextInvoiceModal";
 import { useDemoMode } from "../components/DemoMode";
+import { SERVICE_CATALOG, formatPrice, serviceLine } from "../lib/serviceCatalog";
 
 const DEMO_DATA = {
   clientName: "Jane Smith",
@@ -86,6 +87,32 @@ export default function Home() {
   function handleChange(e) {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+  }
+
+  // A service counts as picked while its line is in the Job / Service Details box,
+  // so deleting the line by hand also un-picks it.
+  const jobLines = form.jobDetails.split("\n").map((line) => line.trim());
+  const pickedServices = SERVICE_CATALOG.filter((s) => jobLines.includes(serviceLine(s)));
+  const pickedTotal = pickedServices.reduce((sum, s) => sum + s.price, 0);
+
+  function toggleService(service) {
+    setForm((prev) => {
+      const line = serviceLine(service);
+      const lines = prev.jobDetails.split("\n");
+      const isPicked = lines.some((l) => l.trim() === line);
+      const currentTotal = parseFloat(prev.totalAmount) || 0;
+
+      const nextLines = isPicked
+        ? lines.filter((l) => l.trim() !== line)
+        : [...lines.filter((l) => l.trim() !== ""), line];
+      const nextTotal = Math.max(0, currentTotal + (isPicked ? -service.price : service.price));
+
+      return {
+        ...prev,
+        jobDetails: nextLines.join("\n"),
+        totalAmount: nextTotal > 0 ? nextTotal.toFixed(2) : "",
+      };
+    });
   }
 
   function loadDemoData() {
@@ -248,13 +275,56 @@ export default function Home() {
 
               <div>
                 <label className={labelClass}>Job / Service Details</label>
+                <div className="mb-2 rounded-lg border border-slate-800 bg-slate-900/60 p-2">
+                  <div className="mb-2 flex items-center justify-between px-1 text-xs">
+                    <span className="text-slate-500">Quick add services</span>
+                    {pickedServices.length > 0 && (
+                      <span className="font-medium text-blue-400">
+                        {pickedServices.length} selected · {formatPrice(pickedTotal)}
+                      </span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+                    {SERVICE_CATALOG.map((service) => {
+                      const isPicked = pickedServices.includes(service);
+                      return (
+                        <button
+                          key={service.id}
+                          type="button"
+                          onClick={() => toggleService(service)}
+                          aria-pressed={isPicked}
+                          className={`flex items-center justify-between gap-2 rounded-md border px-2.5 py-1.5 text-left text-xs transition ${
+                            isPicked
+                              ? "border-blue-500 bg-blue-600/20 text-blue-100"
+                              : "border-slate-700 text-slate-300 hover:border-slate-500 hover:bg-slate-800"
+                          }`}
+                        >
+                          <span className="flex min-w-0 items-center gap-1.5">
+                            <span
+                              aria-hidden="true"
+                              className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-sm border text-[9px] leading-none ${
+                                isPicked ? "border-blue-400 bg-blue-500 text-white" : "border-slate-600"
+                              }`}
+                            >
+                              {isPicked ? "✓" : ""}
+                            </span>
+                            <span className="truncate">{service.name}</span>
+                          </span>
+                          <span className={`shrink-0 font-semibold ${isPicked ? "text-blue-200" : "text-green-400"}`}>
+                            {formatPrice(service.price)}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
                 <textarea
                   name="jobDetails"
                   value={form.jobDetails}
                   onChange={handleChange}
                   required
-                  rows={3}
-                  placeholder="Alternator Replacement & Battery Maintenance"
+                  rows={Math.max(3, pickedServices.length + 1)}
+                  placeholder="Pick services above or type the job details here"
                   className={`${inputClass} resize-none`}
                 />
               </div>

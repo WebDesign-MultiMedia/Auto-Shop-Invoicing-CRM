@@ -10,10 +10,13 @@ export async function getRecentReceipts({ limit = 4, search = "" } = {}) {
   try {
     const rows = await listReceipts({ sid: session.sid });
 
-    const filtered = search
+    // "#RCT-123" and "rct-123" should both match receipt RCT-123.
+    const needle = String(search || "").trim().replace(/^#/, "").toLowerCase();
+
+    const filtered = needle
       ? rows.filter((row) => {
-          const haystack = `${row.clientName || ""} ${row.carDetails || ""} ${row.vin || ""}`.toLowerCase();
-          return haystack.includes(String(search).toLowerCase());
+          const haystack = `${row.id || ""} ${row.clientName || ""} ${row.carDetails || ""} ${row.vin || ""}`.toLowerCase();
+          return haystack.includes(needle);
         })
       : rows;
 
