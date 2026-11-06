@@ -2,7 +2,7 @@
 
 Client-owned invoicing and CRM for an auto repair shop — VIN scanning, PDF receipts via email/SMS, customer history, and a daily revenue dashboard.
 
-**Live demo:** _demo URL coming soon_ (runs in demo mode with fake sample data - see below)
+**Live demo:** https://auto-shop-crm-demo.vercel.app (log in with `demo@example.com` / `TryTheDemo2026` - runs in demo mode with fake sample data, see below)
 
 ## Features
 
