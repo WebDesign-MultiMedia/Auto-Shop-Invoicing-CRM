@@ -6,6 +6,7 @@ import VinScannerModal from "../components/VinScannerModal";
 import RecentReceiptsPanel from "../components/RecentReceiptsPanel";
 import VehicleSpecsCard from "../components/VehicleSpecsCard";
 import TextInvoiceModal from "../components/TextInvoiceModal";
+import { useDemoMode } from "../components/DemoMode";
 
 const DEMO_DATA = {
   clientName: "Jane Smith",
@@ -65,6 +66,7 @@ const inputClass =
 const labelClass = "mb-1 block text-sm font-medium text-slate-300";
 
 export default function Home() {
+  const isDemo = useDemoMode();
   const [form, setForm] = useState(EMPTY_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState(null);
@@ -134,13 +136,15 @@ export default function Home() {
             </span>
           </div>
 
-          <button
-            type="button"
-            onClick={loadDemoData}
-            className="mb-6 w-full rounded-lg border border-dashed border-blue-500/40 bg-blue-500/10 px-4 py-2.5 text-sm font-semibold text-blue-400 transition hover:bg-blue-500/20"
-          >
-            ⚡ Load Demo Data
-          </button>
+          {isDemo && (
+            <button
+              type="button"
+              onClick={loadDemoData}
+              className="mb-6 w-full rounded-lg border border-dashed border-blue-500/40 bg-blue-500/10 px-4 py-2.5 text-sm font-semibold text-blue-400 transition hover:bg-blue-500/20"
+            >
+              ⚡ Load Demo Data
+            </button>
+          )}
 
           <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6 lg:grid-cols-[280px_1fr]">
             {/* Vehicle preview card + full specs */}

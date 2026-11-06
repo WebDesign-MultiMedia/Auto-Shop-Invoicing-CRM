@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { getRecentReceipts } from "../../actions/getReceipts";
 import VehicleSpecsCard from "../../components/VehicleSpecsCard";
 import TextInvoiceModal from "../../components/TextInvoiceModal";
@@ -11,6 +11,83 @@ const VIEW_MODES = [
   { id: "grid", label: "Grid" },
   { id: "detailed", label: "Detailed" },
 ];
+
+const SORT_OPTIONS = [
+  { id: "newest", label: "Newest first" },
+  { id: "oldest", label: "Oldest first" },
+  { id: "amount-desc", label: "Highest amount" },
+  { id: "amount-asc", label: "Lowest amount" },
+  { id: "name-asc", label: "Customer A–Z" },
+  { id: "name-desc", label: "Customer Z–A" },
+];
+
+const DATE_RANGES = [
+  { id: "all", label: "All time" },
+  { id: "today", label: "Today" },
+  { id: "7d", label: "Last 7 days" },
+  { id: "30d", label: "Last 30 days" },
+  { id: "month", label: "This month" },
+  { id: "year", label: "This year" },
+];
+
+const DEFAULT_FILTERS = { sort: "newest", range: "all", payment: "all" };
+
+function timeOf(receipt) {
+  const t = new Date(receipt.dateCreated || 0).getTime();
+  return Number.isNaN(t) ? 0 : t;
+}
+
+function amountOf(receipt) {
+  const n = parseFloat(String(receipt.totalAmount ?? "").replace(/[^0-9.-]/g, ""));
+  return Number.isNaN(n) ? 0 : n;
+}
+
+function rangeStart(range) {
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  switch (range) {
+    case "today":
+      return startOfToday.getTime();
+    case "7d":
+      return startOfToday.getTime() - 6 * 86400000;
+    case "30d":
+      return startOfToday.getTime() - 29 * 86400000;
+    case "month":
+      return new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+    case "year":
+      return new Date(now.getFullYear(), 0, 1).getTime();
+    default:
+      return null;
+  }
+}
+
+const COMPARATORS = {
+  newest: (a, b) => timeOf(b) - timeOf(a),
+  oldest: (a, b) => timeOf(a) - timeOf(b),
+  "amount-desc": (a, b) => amountOf(b) - amountOf(a) || timeOf(b) - timeOf(a),
+  "amount-asc": (a, b) => amountOf(a) - amountOf(b) || timeOf(b) - timeOf(a),
+  "name-asc": (a, b) => String(a.clientName || "").localeCompare(String(b.clientName || "")),
+  "name-desc": (a, b) => String(b.clientName || "").localeCompare(String(a.clientName || "")),
+};
+
+function FilterSelect({ label, value, onChange, options }) {
+  return (
+    <label className="flex flex-col gap-1">
+      <span className="text-[11px] font-medium uppercase tracking-wide text-slate-500">{label}</span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+      >
+        {options.map((opt) => (
+          <option key={opt.id} value={opt.id}>
+            {opt.label}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
 
 function parseVehicleDetails(raw) {
   if (!raw) return null;
@@ -40,6 +117,29 @@ export default function HistoryPage() {
   const activeTriggerRef = useRef(null);
   const [viewingInvoiceId, setViewingInvoiceId] = useState(null);
   const [viewMode, setViewMode] = useState("list");
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
+
+  const paymentOptions = useMemo(() => {
+    const methods = [...new Set(receipts.map((r) => r.paymentMethod).filter(Boolean))].sort();
+    return [{ id: "all", label: "All methods" }, ...methods.map((m) => ({ id: m, label: m }))];
+  }, [receipts]);
+
+  const visibleReceipts = useMemo(() => {
+    const start = rangeStart(filters.range);
+    return receipts
+      .filter((r) => start === null || timeOf(r) >= start)
+      .filter((r) => filters.payment === "all" || r.paymentMethod === filters.payment)
+      .sort(COMPARATORS[filters.sort] || COMPARATORS.newest);
+  }, [receipts, filters]);
+
+  const filtersActive =
+    filters.sort !== DEFAULT_FILTERS.sort ||
+    filters.range !== DEFAULT_FILTERS.range ||
+    filters.payment !== DEFAULT_FILTERS.payment;
+
+  function updateFilter(key, value) {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  }
 
   async function handleViewInvoice(invoiceId) {
     setViewingInvoiceId(invoiceId);
@@ -121,15 +221,52 @@ export default function HistoryPage() {
         />
       </div>
 
+      <div className="mb-6 rounded-xl border border-slate-800 bg-slate-800/30 p-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <FilterSelect
+            label="Sort by"
+            value={filters.sort}
+            onChange={(v) => updateFilter("sort", v)}
+            options={SORT_OPTIONS}
+          />
+          <FilterSelect
+            label="Date range"
+            value={filters.range}
+            onChange={(v) => updateFilter("range", v)}
+            options={DATE_RANGES}
+          />
+          <FilterSelect
+            label="Payment method"
+            value={filters.payment}
+            onChange={(v) => updateFilter("payment", v)}
+            options={paymentOptions}
+          />
+        </div>
+        <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
+          <span>
+            Showing {visibleReceipts.length} of {receipts.length} receipt{receipts.length === 1 ? "" : "s"}
+          </span>
+          {filtersActive && (
+            <button
+              type="button"
+              onClick={() => setFilters(DEFAULT_FILTERS)}
+              className="font-medium text-blue-400 transition hover:text-blue-300"
+            >
+              Reset filters
+            </button>
+          )}
+        </div>
+      </div>
+
       {isLoading && <p className="text-sm text-slate-500">Loading...</p>}
       {error && <p className="text-sm text-red-400">{error}</p>}
-      {!isLoading && !error && receipts.length === 0 && (
+      {!isLoading && !error && visibleReceipts.length === 0 && (
         <p className="text-sm text-slate-500">No matching receipts found.</p>
       )}
 
       {viewMode === "list" && (
         <div className="flex flex-col gap-2">
-          {receipts.map((receipt) => {
+          {visibleReceipts.map((receipt) => {
             const formattedDate = receipt.dateCreated
               ? new Date(receipt.dateCreated).toLocaleDateString()
               : "";
@@ -176,7 +313,7 @@ export default function HistoryPage() {
 
       {viewMode === "grid" && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {receipts.map((receipt) => {
+          {visibleReceipts.map((receipt) => {
             const formattedDate = receipt.dateCreated
               ? new Date(receipt.dateCreated).toLocaleDateString()
               : "";
@@ -219,7 +356,7 @@ export default function HistoryPage() {
 
       {viewMode === "detailed" && (
         <div className="flex flex-col gap-4">
-          {receipts.map((receipt) => {
+          {visibleReceipts.map((receipt) => {
             const vehicleDetails = parseVehicleDetails(receipt.vehicleSpecifications);
             const formattedDate = receipt.dateCreated
               ? new Date(receipt.dateCreated).toLocaleString()
