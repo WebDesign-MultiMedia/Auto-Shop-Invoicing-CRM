@@ -62,6 +62,8 @@ const EMPTY_FORM = {
   paymentMethod: "Cash",
 };
 
+const SERVICE_LINES = new Set(SERVICE_CATALOG.map(serviceLine));
+
 const inputClass =
   "w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-slate-100 placeholder-slate-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500";
 const labelClass = "mb-1 block text-sm font-medium text-slate-300";
@@ -102,14 +104,18 @@ export default function Home() {
       const isPicked = lines.some((l) => l.trim() === line);
       const currentTotal = parseFloat(prev.totalAmount) || 0;
 
-      const nextLines = isPicked
-        ? lines.filter((l) => l.trim() !== line)
-        : [...lines.filter((l) => l.trim() !== ""), line];
+      const kept = lines.filter((l) => l.trim() !== "" && l.trim() !== line);
+      const nextLines = isPicked ? kept : [...kept, line];
       const nextTotal = Math.max(0, currentTotal + (isPicked ? -service.price : service.price));
+
+      // End with an empty line after a picked service, so anything the user
+      // types next starts on its own line instead of joining the service line.
+      const lastIsService = SERVICE_LINES.has(nextLines[nextLines.length - 1]?.trim());
+      const jobDetails = nextLines.join("\n") + (lastIsService ? "\n" : "");
 
       return {
         ...prev,
-        jobDetails: nextLines.join("\n"),
+        jobDetails,
         totalAmount: nextTotal > 0 ? nextTotal.toFixed(2) : "",
       };
     });
@@ -135,13 +141,14 @@ export default function Home() {
     setIsSubmitting(true);
     setResult(null);
 
-    const response = await processReceiptAndNotify(form);
+    const submitted = { ...form, jobDetails: form.jobDetails.trim() };
+    const response = await processReceiptAndNotify(submitted);
 
     setResult(response);
     setIsSubmitting(false);
 
     if (response.success) {
-      setLastInvoice({ ...form, id: response.id, dateCreated: response.dateCreated });
+      setLastInvoice({ ...submitted, id: response.id, dateCreated: response.dateCreated });
       setForm(EMPTY_FORM);
       setRefreshKey((key) => key + 1);
     }
