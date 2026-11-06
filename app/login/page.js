@@ -12,7 +12,7 @@ export const metadata = {
 
 export default async function LoginPage({ searchParams }) {
   const next = safeNextPath((await searchParams)?.next) || "";
-  if (await readSession()) redirect(next || "/dashboard");
+  if (await readSession()) redirect(next || "/");
 
   const isDemo = isDemoMode();
   // Optional, demo only: publishable demo credentials shown to visitors.

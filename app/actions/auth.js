@@ -21,7 +21,7 @@ async function clientIp() {
 export async function loginAction(_prevState, formData) {
   const login = String(formData.get("login") || "");
   const password = String(formData.get("password") || "");
-  const next = safeNextPath(String(formData.get("next") || "")) || "/dashboard";
+  const next = safeNextPath(String(formData.get("next") || "")) || "/";
 
   const rateKey = `${await clientIp()}|${normalizeLogin(login) || login.trim().toLowerCase().slice(0, 100)}`;
   if (!consumeAttempt(rateKey)) {
