@@ -149,8 +149,8 @@ export default function Home() {
 
   return (
     <div className="flex min-h-full flex-col lg:h-full lg:flex-row">
-      <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-        <div className="mx-auto max-w-3xl">
+      <div className="no-scrollbar flex-1 overflow-y-auto p-4 sm:p-6">
+        <div className="mx-auto max-w-3xl xl:max-w-4xl">
           <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="text-lg font-bold text-slate-100">
@@ -173,7 +173,7 @@ export default function Home() {
             </button>
           )}
 
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6 lg:grid-cols-[280px_1fr]">
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6 xl:grid-cols-[280px_1fr]">
             {/* Vehicle preview card + full specs */}
             <div className="flex flex-col gap-4 self-start">
               <div className="flex flex-col gap-4 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 p-5">
@@ -284,7 +284,7 @@ export default function Home() {
                       </span>
                     )}
                   </div>
-                  <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+                  <div className="grid grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] gap-1.5">
                     {SERVICE_CATALOG.map((service) => {
                       const isPicked = pickedServices.includes(service);
                       return (
@@ -308,7 +308,7 @@ export default function Home() {
                             >
                               {isPicked ? "✓" : ""}
                             </span>
-                            <span className="truncate">{service.name}</span>
+                            <span className="leading-snug">{service.name}</span>
                           </span>
                           <span className={`shrink-0 font-semibold ${isPicked ? "text-blue-200" : "text-green-400"}`}>
                             {formatPrice(service.price)}

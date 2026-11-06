@@ -6,3 +6,14 @@ html,
 body {
   height: 100%;
 }
+
+/* Scrolls normally (wheel, touch, keyboard) but hides the scrollbar. */
+@layer utilities {
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}

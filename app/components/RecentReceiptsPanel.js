@@ -69,7 +69,7 @@ export default function RecentReceiptsPanel({ refreshKey }) {
   }, [refreshKey]);
 
   return (
-    <div className="flex w-full flex-col border-t border-slate-800 bg-slate-950 p-4 sm:p-5 lg:h-full lg:w-80 lg:border-l lg:border-t-0">
+    <div className="no-scrollbar flex w-full flex-col border-t border-slate-800 bg-slate-950 p-4 sm:p-5 lg:h-full lg:w-80 lg:shrink-0 lg:overflow-y-auto lg:border-l lg:border-t-0">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-sm font-semibold text-slate-100">Recent Receipts</h2>
       </div>

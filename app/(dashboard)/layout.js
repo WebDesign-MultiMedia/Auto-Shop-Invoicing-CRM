@@ -14,7 +14,7 @@ export default async function DashboardLayout({ children }) {
   return (
     <DemoModeProvider isDemo={isDemo}>
       {isDemo && <DemoBanner />}
-      <div className="flex min-h-screen flex-col bg-slate-900 lg:h-screen lg:flex-row">
+      <div className={`flex min-h-screen flex-col bg-slate-900 lg:h-screen lg:flex-row ${isDemo ? "pt-6 lg:pt-0" : ""}`}>
         <Sidebar />
         <div className="flex-1 overflow-y-auto pb-20 lg:pb-0">{children}</div>
       </div>

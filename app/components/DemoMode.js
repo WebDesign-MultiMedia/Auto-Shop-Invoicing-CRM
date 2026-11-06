@@ -16,7 +16,7 @@ export function DemoBanner() {
   return (
     <div
       role="status"
-      className="pointer-events-none fixed right-3 top-3 z-30 rounded-full bg-amber-400 px-3 py-1 text-xs font-bold text-slate-950 shadow"
+      className="pointer-events-none fixed inset-x-0 top-0 z-30 bg-amber-400 py-1 text-center text-xs font-bold text-slate-950 lg:inset-x-auto lg:right-3 lg:top-3 lg:rounded-full lg:px-3 lg:shadow"
     >
       Demo - sample data
     </div>
